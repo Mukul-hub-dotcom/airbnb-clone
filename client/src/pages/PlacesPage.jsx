@@ -28,14 +28,24 @@ const PlacesPage = () => {
       </>
     );
   }
-  async function addPhotoByLink(){
-    await axios.post('upload-by-link',{link:photoLink})
+  async function addPhotoByLink(e){
+    e.preventDefault()
+    const{data:filename}=await axios.post('/upload-by-link',{link:photoLink})
+    setAddedPhoto(prev=>{
+        return[...prev,filename]
+    })
+    setPhotoLink('')
+  }
+  function uploadPhoto(e){
+    // const files=e.target.files;
+    // const data=new FormData()
+    // data.set('files',files)
   }
   return (
     <div>
       {action !== "new" && (
         <div className="text-center">
-          <Link className="inline-flex gap-1 bg-primary text-white py-2 px-6 rounded-full">
+          <Link className="inline-flex gap-1 bg-primary text-white py-2 px-6 rounded-full" to={'/account/places/new'}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -75,12 +85,17 @@ const PlacesPage = () => {
 
             <div className="flex gap-2">
               <input type="text" value={photoLink} onChange={(e)=>setPhotoLink(e.target.value)} placeholder="Add using a link  ....jpg" />
-              <button className="bg-gray-200 px-4 rounded-2xl">
+              <button onClick={addPhotoByLink} className="bg-gray-200 px-4 rounded-2xl">
                 Add&nbsp;photo
               </button>
             </div>
-            <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              <button className="flex justify-center gap-1 border bg-transparent text-2xl text-gray-600 rounded-2xl p-8">
+
+            <div className="mt-2 grid gap-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {addedPhoto.length>0 && addedPhoto.map(link=>(
+                <div className="h-32 flex">{<img className="rounded-2xl " src={'http://localhost:3000/uploads/'+link} alt="" />}</div>
+              ))}
+              <label className="flex cursor-pointer items-center justify-center gap-1 border bg-transparent text-2xl text-gray-600 rounded-2xl p-2">
+              <input type="file" className="hidden" onChange={uploadPhoto} />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -94,7 +109,7 @@ const PlacesPage = () => {
                   />
                 </svg>
                 Upload
-              </button>
+              </label>
             </div>
             {preInput("Description", "description of the place")}
 

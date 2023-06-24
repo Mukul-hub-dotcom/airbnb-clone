@@ -4,19 +4,19 @@ const mongoose = require("mongoose");
 const User = require("./models/User");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
-const jwt=require('jsonwebtoken')
-const imageDownloader=require('image-downloader')
+const jwt = require("jsonwebtoken");
+const imageDownloader = require("image-downloader");
 
 const app = express();
 
-
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.get("/test", (req, res) => {
   res.json("jain");
 });
 const bcryptSalt = bcrypt.genSaltSync(10);
-const secret='secret'
+const secret = "secret";
 const connect = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URL);
@@ -51,12 +51,16 @@ app.post("/login", async (req, res) => {
   if (userDoc) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
-        const name=userDoc.name
-        jwt.sign({email:userDoc.email,id:userDoc._id},secret,{},(err,token)=>{
-            if(err)throw err
-            res.json({token,name});
-        })
-      
+      const name = userDoc.name;
+      jwt.sign(
+        { email: userDoc.email, id: userDoc._id },
+        secret,
+        {},
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token, name });
+        }
+      );
     } else {
       res.status(422).json("pass not ok");
     }
@@ -64,15 +68,15 @@ app.post("/login", async (req, res) => {
     return res.status(412).json("Not Found");
   }
 });
-app.post('/uploads-by-link',async(req,res)=>{
-    const {link}=req.body
-    const newName=Date.now()+'.jpg'
-    await imageDownloader.image({
-        url:link,
-        dest:__dirname+'/uploads'
-    })
-    res.json(__dirname+'/uploads'+newName)
-})
+app.post("/upload-by-link", async (req, res) => {
+  const { link } = req.body;
+  const newName = "photo" + Date.now() + ".jpg";
+  await imageDownloader.image({
+    url: link,
+    dest: __dirname + "/uploads/" + newName,
+  });
+  res.json(newName);
+});
 
 app.listen(3000, () => {
   console.log(`Server is Listening on 3000`);
