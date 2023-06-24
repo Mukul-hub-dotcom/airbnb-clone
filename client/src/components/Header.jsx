@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
 const Header = () => {
+    const userName=localStorage.getItem('name')
+    const [name,setName]=useState('')
+    useEffect(()=>{
+setName(userName)
+    },[userName])
   return (
     <div>
       <header className="flex justify-between">
@@ -80,6 +85,9 @@ const Header = () => {
               />
             </svg>
           </Link>
+          {name && (
+            <Link to={'/account'}>{name}</Link>
+          )}
         </div>
       </header>
     </div>
