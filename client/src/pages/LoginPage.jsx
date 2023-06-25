@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from 'js-cookie';
+import { UserContext } from "../UserContext";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  //   const [user,setUser]=useState('')
+  const {setUser}=useContext(UserContext)
   async function loginUser(e) {
     e.preventDefault();
     try {
-      const response = await axios.post("/login", { email, password });
+      const {data}= await axios.post("/login", { email, password });
+      setUser(data)
       alert("login successful");
-      const token = response.data.token;
-      const name = response.data.name;
-      localStorage.setItem("name", name);
-      localStorage.setItem("token", token);
+      
+     
       navigate("/");
     } catch (error) {
       alert("login failed");
