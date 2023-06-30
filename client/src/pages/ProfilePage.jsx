@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../UserContext";
 import AccountNav from "./AccountNav";
@@ -6,6 +6,13 @@ import PlacesPage from "./PlacesPage";
 import axios from "axios";
 
 const ProfilePage = () => {
+  const [places, setPlaces] = useState([]);
+  useEffect(() => {
+    axios.get("/places").then((response) => {
+      setPlaces(response.data);
+      console.log(places);
+    });
+  }, []);
   const navigate = useNavigate();
   const { ready, user, setUser } = useContext(UserContext);
   let { subpage } = useParams();
