@@ -8,6 +8,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const imageDownloader = require("image-downloader");
 const cookieParser = require("cookie-parser");
+const Booking = require("./models/Booking");
 
 const app = express();
 
@@ -99,7 +100,7 @@ app.post("/places", (req, res) => {
   const {
     title,
     address,
-    addedPhoto,
+    photoLink,
     description,
     perks,
     extraInfo,
@@ -115,7 +116,7 @@ app.post("/places", (req, res) => {
       owner: userData.id,
       title,
       address,
-      addedPhoto,
+      image: photoLink,
       description,
       perks,
       extraInfo,
@@ -127,6 +128,14 @@ app.post("/places", (req, res) => {
     res.json(placeDoc);
   });
 });
+app.get('/user-places', (req,res) => {
+  const {token} = req.cookies;
+  jwt.verify(token, 'secret', {}, async (err, userData) => {
+    const {id} = userData;
+    res.json( await Place.find({owner:id}) );
+  });
+});
+
 
 app.get("/places", async (req, res) => {
   res.json(await Place.find());
@@ -138,6 +147,40 @@ app.get("/places/:id", async (req, res) => {
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
-app.listen(8000, () => {
-  console.log(`Server is listening on 8080`);
+function getUserDataFromToken(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, secret, {}, async (err, userData) => {
+      if (err) throw err;
+      resolve(userData);
+    });
+  });
+}
+app.post("/bookings", async (req, res) => {
+  const userData = await getUserDataFromToken(req.cookies.token);
+  const { place, checkIn, checkOut, name, phone, price } = req.body;
+  try {
+    const bookingData = await Booking.create({
+      user: userData.id,
+      place,
+      checkIn,
+      checkOut,
+      name,
+      phone,
+      price,
+    });
+
+    res.json(bookingData);
+  } catch (error) {
+    res.json(error.message);
+  }
+});
+
+app.get("/bookings", async (req, res) => {
+  const userData = await getUserDataFromToken(req.cookies.token);
+
+  res.json(await Booking.find({ user: userData.id }).populate("place"));
+});
+
+app.listen(8001, () => {
+  console.log(`Server is listening on 8000`);
 });

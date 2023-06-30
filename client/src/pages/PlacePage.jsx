@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import BookingWidget from "../components/BookingWidget";
 
 export default function PlacePage() {
   const { id } = useParams();
@@ -35,8 +36,11 @@ export default function PlacePage() {
           <br />
           Max number of guests: 400
         </div>
-        <div></div>
       </div>
+      <div className="my-5">
+        <BookingWidget place={place} />
+      </div>
+
       <div className="bg-white -mx-8 px-8 py-8 border-t">
         <div>
           <h2 className="font-semibold text-2xl">Extra info</h2>
